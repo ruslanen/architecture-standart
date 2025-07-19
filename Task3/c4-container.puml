@@ -1,0 +1,61 @@
+@startuml
+
+title Диаграмма контейнеров банка «Стандарт»
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(user, "Клиент", "Клиент использующий мобильное приложение «Тёплый дом»")
+Person(admin, "Специалист по обслуживанию", "Производит настройку устройств у клиентов")
+
+Container_Boundary(WarmHouseSystem, "Система «Тёплый дом»") {
+  Container(MobileApp, "Мобильное приложение «Тёплый дом»", "Kotlin, Swift", "Позволяет пользователям управлять и проводить мониторинг температуры")
+  Container(AdministratorWebApp, "Веб-сайт администрирования", "HTML, Java, Spring", "Позволяет управлять подключениями клиентов")
+  
+  Container(ApiGateway, "ApiGateway", "Kong", "Управляет маршрутизацией и контролем доступа")
+  
+  Container(WarmHouseSystemServices, "Микросервисы")
+
+  Container(MessageBus, "Брокер сообщений", "Apache Kafka", "Обрабатывает сообщения и обеспечивает связь между сервисами и устройствами")
+  Container(OLTPDatabase, "База данных", "PostgreSQL", "Хранит данные о пользователях и устройствах")
+  Container(OLAPDatabase, "База данных", "ClickHouse", "Хранит данные о метриках с датчиков")
+  Container(FileStorage, "Файловое хранилище", "S3", "Хранит видеозаписи с камер наблюдения")
+}
+
+Container_Boundary(WarmHouseSystemServices, "Система «Тёплый дом»") {
+  Container(HeatManagementService, "Сервис управления отоплением", "Java", "Осуществляет микроменеджмент каждого доступного настроенного реле отопления")
+  Container(TemperatureMonitoringService, "Сервис мониторинга температур", "Java", "Осуществляет сбор показаний температуры из датчиков")
+  Container(WebCamService, "Сервис управления и стриминга веб-камерами", "Java", "Осуществляет передачу видеопотока и контроль веб-камерами")
+  Container(DoorManamagentService, "Сервис управления дверьми и воротами", "Java", "Контролирует закрытие или открытие дверей")
+  Container(LightControlService, "Сервис управления освещением", "Java", "Управляет регулировкой света")
+}
+
+System_Ext(heatManagementRelay, "Реле управления отоплением", "Физическое устройство для включения или отключения подачи отопления")
+System_Ext(temperatureSensor, "Датчик температуры", "Физическое устройство для сбора данных о температуре окружающей среды")
+System_Ext(webCamDevice, "Веб-камера", "Физическое устройство для записи видео и просмотра в режиме реального времени")
+System_Ext(doorManagementRelay, "Реле управления дверью", "Физическое устройство для открытия/закрытия дверей")
+System_Ext(lightController, "Регулятор освещения", "Физическое устройство для регулирования света")
+
+Rel(user, MobileApp, "Использует систему")
+Rel(admin, AdministratorWebApp,"Управляет подключениями к системе")
+
+Rel(MobileApp, ApiGateway,"")
+Rel(AdministratorWebApp, ApiGateway, "")
+
+Rel(ApiGateway,WarmHouseSystemServices,"Передает авторизованный запрос на нужный сервис")
+
+Rel(WarmHouseSystemServices,MessageBus,"Посылает сообщение в очередь")
+Rel(WarmHouseSystemServices,OLTPDatabase,"Записывает/читает данные пользователей")
+Rel(WarmHouseSystemServices,OLAPDatabase,"Записывает/читает данные устройств")
+Rel(WarmHouseSystemServices,FileStorage,"Записывает/читает видеозаписи")
+
+Rel(MessageBus,heatManagementRelay,"Отправляет команду на изменение температуры")
+Rel(MessageBus,temperatureSensor,"Получает данные о температуре")
+Rel(WebCamService,webCamDevice,"Получает поток данных с видеокамеры")
+Rel(MessageBus,webCamDevice,"Отправляет команду изменения смещения веб-камере")
+Rel(MessageBus,doorManagementRelay,"Отправляет команду на открытие/закрытие двери")
+Rel(MessageBus,lightController,"Отправляет команду на изменение освещения")
+
+
+@enduml

@@ -1,0 +1,20 @@
+@startuml
+
+title Контекстная диаграмма банка «Стандарт»
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(user, "Клиент", "Клиент интернет-банка «Стандарт»")
+Person(backOfficeEmployee, "Сотрудник бэк-офиса", "Обрабатывает заявки клиентов")
+System(StandardSystem, "Система банка «Стандарт»", "Система банковских сервисов")
+
+System_Ext(telecomOperator, "Телеком-оператор", "Внешний оператор по отправке СМС")
+
+Rel(user, StandardSystem, "Открывает депозит")
+Rel(backOfficeEmployee,StandardSystem,"Обрабатывает заявку на депозит")
+Rel(StandardSystem,telecomOperator,"Отправляет запросы на отправку СМС-уведомлений")
+Rel(telecomOperator,user,"Отправляет СМС-уведомления")
+
+@enduml
