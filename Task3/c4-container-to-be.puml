@@ -1,0 +1,75 @@
+@startuml
+
+title Диаграмма контейнеров банка «Стандарт» (TO-BE)
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(client, "Клиент", "Клиент интернет-банка «Стандарт»")
+Person(backOfficeEmployee, "Сотрудник бэк-офиса", "Обрабатывает заявки клиентов")
+
+Container_Boundary(StandardSystem, "Система банка «Стандарт»", "Система банковских сервисов") {
+  Container(InternetBank,"Интернет-банк","Предоставляет банковские сервисы")
+  Container(AutomatedBankingSystem,"Автоматизированная банковская система","Предоставляет сотрудникам функциональность по обработке запросов клиентов банка")
+  Container(CallCenterSystem,"Система кол-центра","CRM-система, используемая для приема входящих звонков")
+  Container(SmsGateway,"СМС-шлюз телеком-оператора","Предоставляет внутренний интерфейс для отправки СМС-уведомлений")
+
+  'new
+  Container(MessageBroker,"Брокер сообщений","Apache Kafka", "Предоставляет брокер сообщений для взаимодействия сервисов")
+}
+
+Container_Boundary(InternetBank, "", "") {
+  ComponentDb(InternetBankDatabase,"База данных", "MS SQL", "Хранит данные по платежам и счетам")
+  ComponentDb(InternetBankDepositDatabase,"База данных", "MS SQL", "Хранит данные по депозитам")
+
+  'new
+  Container(InternetBankWebClient,"Веб-клиент","ASP.NET Web API based on .NET 6", "Предоставляет API для открытия депозитов")
+  Container(DepositService,"Сервис депозитов","ASP.NET Web API based on .NET 6", "Предоставляет API для открытия депозитов")
+  Container(PaymentService,"Сервис платежей","ASP.NET Web API based on .NET 6", "Предоставляет API для проведения платежей")
+  Container(AccountService,"Сервис счетов","ASP.NET Web API based on .NET 6", "Предоставляет API для открытия счетов")
+
+  Rel(DepositService,InternetBankDepositDatabase,"Читает и записывает даные", "SQL/TCP")
+  Rel(PaymentService,InternetBankDatabase,"Читает и записывает даные", "SQL/TCP")
+  Rel(AccountService,InternetBankDatabase,"Читает и записывает даные", "SQL/TCP")
+
+  Rel(InternetBankWebClient,DepositService,"Вызывает API", "JSON/HTTPS")
+  Rel(InternetBankWebClient,PaymentService,"Вызывает API", "JSON/HTTPS")
+  Rel(InternetBankWebClient,AccountService,"Вызывает API", "JSON/HTTPS")
+}
+
+Container_Boundary(AutomatedBankingSystem, "", "") {
+  Container(AbsDesktopApplication,"Настольное приложение","Delphi", "Предоставляет сервис учета операций по счетам и бухгалтерии")
+  ComponentDb(AbsDatabase,"База данных","Oracle","Хранит данные по банковским операциям")
+
+  Container(DepositProcessingService,"Сервис операций по депозитам",".NET 6", "Предоставляет сервис обработки операций по депозитам")
+  ComponentDb(DepositProcessingServiceDatabase,"База данных","MS SQL","Хранит данные по обработке операций с депозитами")
+
+  Rel(AbsDesktopApplication,AbsDatabase,"Читает и записывает даные", "SQL/TCP")
+  Rel(DepositProcessingService,DepositProcessingServiceDatabase,"Читает и записывает даные", "SQL/TCP")
+  Rel(DepositProcessingService,AbsDatabase,"Читает и записывает даные", "SQL/TCP")
+}
+
+Container_Boundary(CallCenterSystem, "", "") {
+  Container(CallCenterWebClient,"Веб-клиент","React.js", "Предоставляет интерфейс по работе с запросами клиентов")
+  Container(CallCenterWebApplication,"API","Java Spring Boot", "Предоставляет API для клиентской части системы обработки запросов клиентов")
+  ComponentDb(CallCenterDatabase,"База данных","PostgreSQL","Хранит данные по запросам пользователей")
+
+  Rel(CallCenterWebClient,CallCenterWebApplication,"Вызывает API", "JSON/HTTPS")
+  Rel(CallCenterWebApplication,CallCenterDatabase,"Читает и записывает даные", "SQL/TCP")
+}
+
+System_Ext(telecomOperator, "Телеком-оператор", "Внешний оператор по отправке СМС")
+
+Rel(client, InternetBank, "Открывает депозит", "HTTPS")
+Rel(backOfficeEmployee,AutomatedBankingSystem,"Обрабатывает заявку на депозит")
+Rel(SmsGateway,telecomOperator,"Отправляет запросы на отправку СМС-уведомлений", "JSON/HTTPS")
+Rel(telecomOperator,client,"Отправляет СМС-уведомления","SMS")
+
+Rel(InternetBank,SmsGateway,"Формирует запросы на отправку СМС","JSON/HTTPS")
+Rel(AbsDesktopApplication,SmsGateway,"Формирует запросы на отправку СМС","JSON/HTTPS")
+
+Rel(InternetBank,MessageBroker,"Отправляет сообщение в очередь","JSON/AVRO")
+Rel(DepositProcessingService,MessageBroker,"Читает сообщения из очереди","JSON/AVRO")
+
+@enduml

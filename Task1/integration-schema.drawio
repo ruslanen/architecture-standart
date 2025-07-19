@@ -25,9 +25,6 @@
         <mxCell id="RWO4zL4FvoSepyuT1pzz-6" value="СМС-шлюз телеком-оператор" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" vertex="1" parent="1">
           <mxGeometry x="1320" y="260" width="70" height="240" as="geometry" />
         </mxCell>
-        <mxCell id="sdExiyNlZgsASJn3nyZl-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="RWO4zL4FvoSepyuT1pzz-7" target="RWO4zL4FvoSepyuT1pzz-1">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
         <mxCell id="RWO4zL4FvoSepyuT1pzz-7" value="Система кол-центра" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" vertex="1" parent="1">
           <mxGeometry x="340" y="559.5" width="233" height="180" as="geometry" />
         </mxCell>
