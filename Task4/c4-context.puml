@@ -1,0 +1,30 @@
+@startuml
+
+title Контекстная диаграмма банка «Стандарт»
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(client, "Клиент", "Клиент интернет-банка «Стандарт»")
+Person(backOfficeEmployee, "Сотрудник бэк-офиса", "Обрабатывает заявки клиентов")
+Person(internalSupportEmployee, "Сотрудник внутреннего кол-центра", "Обрабатывает запросы клиентов")
+Person(externalSupportEmployee, "Сотрудник внешнего кол-центра", "Обрабатывает запросы клиентов")
+System(StandardSystem, "Система банка «Стандарт»", "Система банковских сервисов")
+
+System_Ext(telecomOperator, "Телеком-оператор", "Внешний оператор по отправке СМС")
+System_Ext(externalCallCenter, "Внешний кол-центр", "Внешняя система работы с клиентскими обращениями")
+System_Ext(centralBankService, "Сервисы ЦБ РФ", "API Центрального Банка России для получения актуальной процентной ставки")
+
+Rel(client, StandardSystem, "Открывает депозит")
+Rel(backOfficeEmployee,StandardSystem,"Обрабатывает заявку на депозит")
+Rel(StandardSystem,telecomOperator,"Отправляет запросы на отправку СМС-уведомлений")
+Rel(telecomOperator,client,"Отправляет СМС-уведомления")
+
+Rel(StandardSystem, internalSupportEmployee, "Получает информацию о процентных ставках банка")
+Rel(StandardSystem, externalSupportEmployee,"Получает информацию о процентных ставках банка")
+
+Rel(externalSupportEmployee,externalCallCenter,"Ведет учет работы с клиентами")
+Rel(StandardSystem,centralBankService,"Запрос актуальной процентной ставки")
+
+@enduml

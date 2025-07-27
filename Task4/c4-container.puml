@@ -1,5 +1,4 @@
 @startuml
-
 title Диаграмма контейнеров банка «Стандарт» (TO-BE)
 
 top to bottom direction
@@ -8,6 +7,8 @@ top to bottom direction
 
 Person(client, "Клиент", "Клиент интернет-банка «Стандарт»")
 Person(backOfficeEmployee, "Сотрудник бэк-офиса", "Обрабатывает заявки клиентов")
+Person(internalSupportEmployee, "Сотрудник внутреннего кол-центра", "Обрабатывает запросы клиентов")
+Person(externalSupportEmployee, "Сотрудник внешнего кол-центра", "Обрабатывает запросы клиентов")
 
 Container_Boundary(StandardSystem, "Система банка «Стандарт»", "Система банковских сервисов") {
   Container(InternetBank,"Интернет-банк","Предоставляет банковские сервисы")
@@ -15,15 +16,21 @@ Container_Boundary(StandardSystem, "Система банка «Стандарт
   Container(CallCenterSystem,"Система кол-центра","CRM-система, используемая для приема входящих звонков")
   Container(SmsGateway,"СМС-шлюз телеком-оператора","Предоставляет внутренний интерфейс для отправки СМС-уведомлений")
 
-  'new
   Container(MessageBroker,"Брокер сообщений","Apache Kafka", "Предоставляет брокер сообщений для взаимодействия сервисов")
+
+  Container(RatesService,"Сервис ставок",".NET 8","Предоставляет функционал расчетов и публикации ежедневных процентных ставок банка")
+  ComponentDb(RatesServiceDatabase,"База данных", "PostgreSQL", "Хранит данные по историчности процентных ставок")
+  Rel(RatesService,RatesServiceDatabase,"Читает и записывает даные", "SQL/TCP")
+  
+  Container(NotificationService,"Сервис уведомлений",".NET 8","Предоставляет функционал рассылки сообщений")
+  ComponentDb(NotificationServiceDatabase,"База данных", "PostgreSQL", "Хранит данные по логам рассылок")
+  Rel(NotificationService,NotificationServiceDatabase,"Читает и записывает даные", "SQL/TCP")
 }
 
 Container_Boundary(InternetBank, "", "") {
   ComponentDb(InternetBankDatabase,"База данных", "MS SQL", "Хранит данные по платежам и счетам")
   ComponentDb(InternetBankDepositDatabase,"База данных", "MS SQL", "Хранит данные по депозитам")
 
-  'new
   Container(InternetBankWebClient,"Веб-клиент","ASP.NET Web API based on .NET 8", "Предоставляет API для открытия депозитов")
   Container(DepositService,"Сервис депозитов","ASP.NET Web API based on .NET 8", "Предоставляет API для открытия депозитов")
   Container(PaymentService,"Сервис платежей","ASP.NET Web API based on .NET 8", "Предоставляет API для проведения платежей")
@@ -60,6 +67,8 @@ Container_Boundary(CallCenterSystem, "", "") {
 }
 
 System_Ext(telecomOperator, "Телеком-оператор", "Внешний оператор по отправке СМС")
+System_Ext(externalCallCenter, "Внешний кол-центр", "Внешняя система работы с клиентскими обращениями")
+System_Ext(centralBankService, "Сервисы ЦБ РФ", "API Центрального Банка России для получения актуальной процентной ставки")
 
 Rel(client, InternetBank, "Открывает депозит", "HTTPS")
 Rel(backOfficeEmployee,AutomatedBankingSystem,"Обрабатывает заявку на депозит")
@@ -71,5 +80,14 @@ Rel(AbsDesktopApplication,SmsGateway,"Формирует запросы на о�
 
 Rel(InternetBank,MessageBroker,"Отправляет сообщение в очередь","JSON/AVRO")
 Rel(DepositProcessingService,MessageBroker,"Читает сообщения из очереди","JSON/AVRO")
+
+Rel(StandardSystem, internalSupportEmployee, "Получает информацию о процентных ставках банка")
+Rel(StandardSystem, externalSupportEmployee,"Получает информацию о процентных ставках банка")
+
+Rel(externalSupportEmployee,externalCallCenter,"Ведет учет работы с клиентами")
+Rel(StandardSystem,centralBankService,"Запрос актуальной процентной ставки")
+
+Rel(RatesService,MessageBroker,"Отправляет сообщение об актуальной ставки","JSON/AVRO")
+Rel(NotificationService,MessageBroker,"Читает сообщения из очереди для рассылки обновлений по электронной почте","JSON/AVRO")
 
 @enduml

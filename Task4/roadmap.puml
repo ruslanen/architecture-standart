@@ -1,0 +1,30 @@
+@startgantt
+
+projectscale quarterly
+Project starts the 1st of jule 2024
+[Разработка сервиса ставок] as [TASK1] requires 30 days
+[TASK1] is colored in Lavender/LightBlue
+[Интеграция сервиса ставок с API ЦБ РФ] as [TASK2] requires 15 days
+[TASK2] is colored in Lavender/LightBlue
+[TASK1]->[TASK2]
+[Разработка логики бизнес-правил ставок] as [TASK3] requires 15 days
+[TASK3] is colored in Lavender/LightBlue
+[TASK2]->[TASK3]
+
+[Разработка сервиса уведомлений] as [TASK4] requires 30 days
+[TASK4] is colored in Lavender/LightBlue
+
+[Интеграция сервисов с Kafka] as [TASK5] requires 30 days
+[TASK5] is colored in Lavender/LightBlue
+[TASK3]->[TASK5]
+[TASK4]->[TASK5]
+
+[Тестирование] as [TASK6] requires 30 days
+[TASK6] is colored in Lavender/LightBlue
+[TASK5]->[TASK6]
+
+[Документирование решений] as [TASK7] requires 15 days
+[TASK7] is colored in Lavender/LightBlue
+[TASK6]->[TASK7]
+
+@endgantt
